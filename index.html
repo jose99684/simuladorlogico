@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulador Lógico Pro - Estilo Proteus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #1e293b; color: white; font-family: 'Consolas', monospace; }
+        .grid-bg {
+            background-color: #cbd5e1;
+            background-image: radial-gradient(#94a3b8 1px, transparent 1px);
+            background-size: 20px 20px;
+            border-radius: 8px;
+            position: relative;
+        }
+        /* Colores de señales Proteus */
+        .wire { fill: none; stroke-width: 3; transition: all 0.3s; }
+        .high { stroke: #ef4444; filter: drop-shadow(0 0 5px #ef4444); } /* Rojo */
+        .low { stroke: #2563eb; } /* Azul */
+        
+        .probe { width: 12px; height: 12px; border: 1px solid #000; }
+        .probe-1 { background: #ef4444; }
+        .probe-0 { background: #2563eb; }
+
+        .gate-label { fill: #334155; font-size: 10px; font-weight: bold; pointer-events: none; }
+        .switch-btn { transition: all 0.2s; cursor: pointer; }
+        .switch-btn:active { transform: scale(0.9); }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-6xl mx-auto space-y-4">
+        <div class="flex justify-between items-center bg-slate-900 p-4 rounded-lg border-b-4 border-blue-500 shadow-xl">
+            <div>
+                <h1 class="text-2xl font-black text-blue-400 tracking-tighter">LABORATORIO VIRTUAL LÓGICO</h1>
+                <p class="text-xs text-slate-400">BASADO EN LA ECUACIÓN 2: F = (-A*-B*C) + (-A*B*C) + (A*B*C)</p>
+            </div>
+            <div class="text-right">
+                <div id="status-badge" class="px-3 py-1 bg-emerald-500 text-black text-xs font-bold rounded animate-pulse">SIMULACIÓN ACTIVA</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
+                <h2 class="text-sm font-bold mb-4 text-slate-400 border-b border-slate-700 pb-2 uppercase text-center">Entradas (Logic)</h2>
+                <div class="space-y-6" id="controls">
+                    <div class="flex flex-col items-center">
+                        <span class="text-xl font-bold mb-1">A</span>
+                        <div onclick="toggleVar('A')" id="btn-A" class="switch-btn w-12 h-12 rounded bg-blue-600 border-2 border-white flex items-center justify-center text-xl font-black shadow-lg">0</div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-xl font-bold mb-1">B</span>
+                        <div onclick="toggleVar('B')" id="btn-B" class="switch-btn w-12 h-12 rounded bg-blue-600 border-2 border-white flex items-center justify-center text-xl font-black shadow-lg">0</div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-xl font-bold mb-1">C</span>
+                        <div onclick="toggleVar('C')" id="btn-C" class="switch-btn w-12 h-12 rounded bg-blue-600 border-2 border-white flex items-center justify-center text-xl font-black shadow-lg">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 grid-bg p-2 min-h-[500px] border-2 border-slate-400 overflow-hidden shadow-2xl">
+                <svg id="schematic" viewBox="0 0 600 500" class="w-full h-full">
+                    </svg>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                    <h2 class="text-xs font-bold text-center mb-2">TABLA DE VERDAD</h2>
+                    <table class="w-full text-[10px] text-center border-collapse">
+                        <thead class="bg-slate-800 text-blue-400">
+                            <tr>
+                                <th class="p-1 border border-slate-700">A</th>
+                                <th class="p-1 border border-slate-700">B</th>
+                                <th class="p-1 border border-slate-700">C</th>
+                                <th class="p-1 border border-slate-700 bg-blue-900">F</th>
+                            </tr>
+                        </thead>
+                        <tbody id="truth-table-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="bg-black p-6 rounded-lg border-2 border-slate-700 flex flex-col items-center justify-center">
+                    <span class="text-[10px] text-slate-500 mb-2">OUTPUT PROBE (F)</span>
+                    <div id="final-out" class="text-6xl font-black text-blue-600 transition-all duration-300">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = { A: 0, B: 0, C: 0 };
+
+        function toggleVar(v) {
+            state[v] = state[v] === 0 ? 1 : 0;
+            const btn = document.getElementById(`btn-${v}`);
+            btn.innerText = state[v];
+            btn.className = `switch-btn w-12 h-12 rounded border-2 border-white flex items-center justify-center text-xl font-black shadow-lg ${state[v] ? 'bg-red-600' : 'bg-blue-600'}`;
+            update();
+        }
+
+        function calculateLogic() {
+            const { A, B, C } = state;
+            // Ecuación: F = (-A*-B*C) + (-A*B*C) + (A*B*C)
+            const term1 = (!A && !B && C);
+            const term2 = (!A && B && C);
+            const term3 = (A && B && C);
+            return { f: (term1 || term2 || term3) ? 1 : 0, t1: term1, t2: term2, t3: term3 };
+        }
+
+        function drawSchematic() {
+            const svg = document.getElementById('schematic');
+            const res = calculateLogic();
+            const { A, B, C } = state;
+
+            // Limpiar SVG
+            svg.innerHTML = `
+                <defs>
+                    <symbol id="not-gate" viewBox="0 0 40 40">
+                        <path d="M 5 5 L 5 35 L 30 20 Z" fill="#e2e8f0" stroke="#1e293b" stroke-width="2"/>
+                        <circle cx="34" cy="20" r="4" fill="#fff" stroke="#1e293b" stroke-width="2"/>
+                    </symbol>
+                    <symbol id="and-gate" viewBox="0 0 50 50">
+                        <path d="M 5 5 L 5 45 L 25 45 Q 45 45 45 25 Q 45 5 25 5 Z" fill="#e2e8f0" stroke="#1e293b" stroke-width="2"/>
+                    </symbol>
+                    <symbol id="or-gate" viewBox="0 0 50 50">
+                        <path d="M 5 5 Q 15 25 5 45 Q 35 45 45 25 Q 35 5 5 5 Z" fill="#e2e8f0" stroke="#1e293b" stroke-width="2"/>
+                    </symbol>
+                </defs>
+            `;
+
+            // 1. Dibujar entradas y cables iniciales
+            const inputs = ['A', 'B', 'C'];
+            inputs.forEach((label, i) => {
+                const y = 80 + (i * 140);
+                const val = state[label];
+                svg.innerHTML += `
+                    <text x="20" y="${y+5}" class="font-bold fill-slate-800 text-xl">${label}</text>
+                    <rect x="45" y="${y-15}" width="30" height="30" fill="${val ? '#ef4444' : '#2563eb'}" />
+                    <text x="60" y="${y+7}" fill="white" font-weight="bold" text-anchor="middle">${val}</text>
+                    <path d="M 75 ${y} L 120 ${y}" class="wire ${val ? 'high' : 'low'}" />
+                `;
+            });
+
+            // 2. Dibujar Inversores (NOT) para A y B
+            svg.innerHTML += `
+                <use href="#not-gate" x="120" y="60" width="40" height="40" />
+                <use href="#not-gate" x="120" y="200" width="40" height="40" />
+                <path d="M 160 80 L 200 80" class="wire ${!A ? 'high' : 'low'}" />
+                <path d="M 160 220 L 200 220" class="wire ${!B ? 'high' : 'low'}" />
+                <text x="125" y="55" class="gate-label">NOT</text>
+            `;
+
+            // 3. Dibujar AND para el Término 1 (-A*-B*C)
+            svg.innerHTML += `
+                <use href="#and-gate" x="250" y="100" width="60" height="60" />
+                <path d="M 200 80 L 250 115" class="wire ${!A ? 'high' : 'low'}" />
+                <path d="M 200 220 L 250 130" class="wire ${!B ? 'high' : 'low'}" />
+                <path d="M 75 360 L 250 145" class="wire ${C ? 'high' : 'low'}" />
+                <text x="265" y="95" class="gate-label">AND (T1)</text>
+                <path d="M 310 130 L 400 230" class="wire ${res.t1 ? 'high' : 'low'}" />
+            `;
+
+            // 4. Compuerta OR Final
+            svg.innerHTML += `
+                <use href="#or-gate" x="420" y="210" width="80" height="80" />
+                <text x="440" y="205" class="gate-label">OR FINAL</text>
+                <path d="M 500 250 L 550 250" class="wire ${res.f ? 'high' : 'low'}" />
+                <rect x="550" y="235" width="30" height="30" fill="${res.f ? '#ef4444' : '#2563eb'}" />
+                <text x="565" y="255" fill="white" font-weight="bold" text-anchor="middle">${res.f}</text>
+            `;
+        }
+
+        function renderTable() {
+            const body = document.getElementById('truth-table-body');
+            body.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                const a = (i & 4) ? 1 : 0;
+                const b = (i & 2) ? 1 : 0;
+                const c = (i & 1) ? 1 : 0;
+                
+                // Cálculo de la fila
+                const f = ((!a && !b && c) || (!a && b && c) || (a && b && c)) ? 1 : 0;
+                const isCurrent = (a === state.A && b === state.B && c === state.C);
+                
+                body.innerHTML += `
+                    <tr class="${isCurrent ? 'bg-blue-600/40 font-bold' : ''} border-b border-slate-800">
+                        <td class="p-1">${a}</td>
+                        <td class="p-1">${b}</td>
+                        <td class="p-1">${c}</td>
+                        <td class="p-1 text-blue-400">${f}</td>
+                    </tr>
+                `;
+            }
+        }
+
+        function update() {
+            const res = calculateLogic();
+            const out = document.getElementById('final-out');
+            out.innerText = res.f;
+            out.className = `text-6xl font-black transition-all duration-300 ${res.f ? 'text-red-500 shadow-lg' : 'text-blue-600'}`;
+            
+            drawSchematic();
+            renderTable();
+        }
+
+        // Inicializar
+        update();
+    </script>
+</body>
+</html>
