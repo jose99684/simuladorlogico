@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laboratorio de Lógica - Análisis Completo</title>
+    <title>Laboratorio de Lógica - Doble Inversor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=JetBrains+Mono&display=swap');
@@ -93,7 +93,7 @@
             
             <div class="flex flex-wrap justify-center gap-4 items-center">
                 <div class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl text-slate-400 text-sm math-font">
-                    Simplificada: F = (¬A + B) · C
+                    Simplificada: F = (¬A · ¬B) + C
                 </div>
                 <div class="math-main text-lg md:text-xl">
                     F = (-A * -B * C) + (-A * B * C) + (A * B * C)
@@ -107,7 +107,7 @@
             <div class="lg:col-span-8">
                 <div class="canvas-container p-6">
                     <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-                        <span class="text-[10px] font-black text-slate-500 tracking-widest uppercase">Vista de Diagrama</span>
+                        <span class="text-[10px] font-black text-slate-500 tracking-widest uppercase">Vista de Diagrama (Doble NOT)</span>
                         <div class="flex gap-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-3 h-3 bg-white rounded-full shadow-[0_0_8px_white]"></div>
@@ -155,15 +155,23 @@
                             <text x="80" y="350" text-anchor="middle" fill="#64748b" font-weight="bold" font-size="14">C</text>
                         </g>
 
-                        <use href="#gate-not" x="200" y="90" width="70" height="50" />
-                        <use href="#gate-or" x="360" y="160" width="90" height="60" />
-                        <use href="#gate-and" x="560" y="245" width="90" height="60" />
+                        <!-- Gates -->
+                        <!-- NOT en A -->
+                        <use href="#gate-not" x="180" y="90" width="70" height="50" />
+                        <!-- NOT en B -->
+                        <use href="#gate-not" x="180" y="230" width="70" height="50" />
+                        
+                        <!-- AND gate (T1) -->
+                        <use href="#gate-and" x="380" y="150" width="90" height="60" />
+                        
+                        <!-- OR gate (Final) -->
+                        <use href="#gate-or" x="580" y="250" width="90" height="60" />
 
                         <!-- Result -->
                         <g>
-                            <circle cx="740" cy="275" r="35" id="circle-F" fill="#0f172a" stroke="#334155" stroke-width="4" />
-                            <text x="740" y="285" text-anchor="middle" fill="#334155" font-size="28" font-weight="bold" id="txt-F">0</text>
-                            <text x="740" y="335" text-anchor="middle" fill="#94a3b8" font-weight="bold" font-size="14">F</text>
+                            <circle cx="750" cy="275" r="35" id="circle-F" fill="#0f172a" stroke="#334155" stroke-width="4" />
+                            <text x="750" y="285" text-anchor="middle" fill="#334155" font-size="28" font-weight="bold" id="txt-F">0</text>
+                            <text x="750" y="335" text-anchor="middle" fill="#94a3b8" font-weight="bold" font-size="14">F</text>
                         </g>
                     </svg>
                 </div>
@@ -202,15 +210,14 @@
                             <tr class="border-b border-slate-700">
                                 <th class="py-4 px-2">A</th>
                                 <th class="py-4 px-2">B</th>
-                                <th class="py-4 px-2">C</th>
-                                <th class="py-4 px-2 bg-slate-800/50">(-A*-B*C)</th>
-                                <th class="py-4 px-2 bg-slate-800/50">(-A*B*C)</th>
-                                <th class="py-4 px-2 bg-slate-800/50">(A*B*C)</th>
+                                <th class="py-3 px-2">C</th>
+                                <th class="py-4 px-2 bg-slate-800/50">T1:(-A*-B*C)</th>
+                                <th class="py-4 px-2 bg-slate-800/50">T2:(-A*B*C)</th>
+                                <th class="py-4 px-2 bg-slate-800/50">T3:(A*B*C)</th>
                                 <th class="py-4 px-2 text-red-500 font-black">Resultado F</th>
                             </tr>
                         </thead>
                         <tbody id="detailed-table" class="divide-y divide-slate-800 text-sm">
-                            <!-- Filas dinámicas -->
                         </tbody>
                     </table>
                 </div>
@@ -235,21 +242,25 @@
             const na = a === 0 ? 1 : 0;
             const nb = b === 0 ? 1 : 0;
             
+            // Términos de la fórmula larga
             const t1 = (na && nb && c) ? 1 : 0;
             const t2 = (na && b && c) ? 1 : 0;
             const t3 = (a && b && c) ? 1 : 0;
             
-            return { t1, t2, t3, f: (t1 || t2 || t3) ? 1 : 0, na };
+            // Lógica del circuito gráfico: (¬A AND ¬B) OR C
+            // Nota: El gráfico muestra que (¬A AND ¬B) se suma con C
+            const andPart = (na && nb) ? 1 : 0;
+            const f_circuit = (andPart || c) ? 1 : 0;
+            
+            return { na, nb, andPart, t1, t2, t3, f: f_circuit };
         }
 
         function update() {
             const current = calculateValues(state.A, state.B, state.C);
-            const orRes = (current.na || state.B) ? 1 : 0;
 
             // Update Inputs
             ['A', 'B', 'C'].forEach(k => {
                 document.getElementById(`txt-${k}`).textContent = state[k];
-                // El fondo del botón sigue la lógica: Blanco si es 1, Rojo si es 0
                 document.getElementById(`bg-${k}`).setAttribute('fill', state[k] ? '#ffffff' : '#ef4444');
                 document.getElementById(`txt-${k}`).setAttribute('fill', state[k] ? '#0f172a' : '#ffffff');
             });
@@ -262,14 +273,20 @@
             txtF.textContent = current.f;
             txtF.setAttribute('fill', current.f ? '#ffffff' : '#ef4444');
 
-            // Cables (Cambiado: Blanco para 1, Rojo para 0)
+            // Cables (Blanco para 1, Rojo para 0)
             const wires = [
-                { d: "M 120 110 L 200 110", active: state.A === 1 },
-                { d: "M 270 115 L 320 115 L 320 180 L 360 180", active: current.na === 1 },
-                { d: "M 120 250 L 320 250 L 320 200 L 360 200", active: state.B === 1 },
-                { d: "M 450 190 L 510 190 L 510 260 L 560 260", active: orRes === 1 },
-                { d: "M 120 390 L 510 390 L 510 290 L 560 290", active: state.C === 1 },
-                { d: "M 650 275 L 705 275", active: current.f === 1 }
+                // Entradas a NOTs
+                { d: "M 120 110 L 180 110", active: state.A === 1 },
+                { d: "M 120 250 L 180 250", active: state.B === 1 },
+                // Salidas NOTs a AND
+                { d: "M 250 115 L 330 115 L 330 165 L 380 165", active: current.na === 1 },
+                { d: "M 250 255 L 330 255 L 330 195 L 380 195", active: current.nb === 1 },
+                // Salida AND a OR
+                { d: "M 470 180 L 530 180 L 530 265 L 580 265", active: current.andPart === 1 },
+                // Entrada C a OR
+                { d: "M 120 390 L 530 390 L 530 285 L 580 285", active: state.C === 1 },
+                // Salida Final
+                { d: "M 670 275 L 715 275", active: current.f === 1 }
             ];
 
             document.getElementById('wires-group').innerHTML = wires.map(w => 
@@ -293,9 +310,8 @@
                 const isActive = (a === state.A && b === state.B && c === state.C);
                 const rowClass = isActive ? 'current-row' : '';
 
-                // Quick Table
                 quickBody.innerHTML += `
-                    <tr class="table-row ${rowClass}" onclick="setRow(${a},${b},${c})">
+                    <tr class="table-row ${rowClass} cursor-pointer hover:bg-slate-700/20" onclick="setRow(${a},${b},${c})">
                         <td class="py-3">${a}</td>
                         <td class="py-3">${b}</td>
                         <td class="py-3">${c}</td>
@@ -303,9 +319,8 @@
                     </tr>
                 `;
 
-                // Detailed Table
                 detailBody.innerHTML += `
-                    <tr class="${rowClass} hover:bg-slate-800/30 transition-colors" onclick="setRow(${a},${b},${c})">
+                    <tr class="${rowClass} hover:bg-slate-800/30 transition-colors cursor-pointer" onclick="setRow(${a},${b},${c})">
                         <td class="py-4 text-slate-400">${a}</td>
                         <td class="py-4 text-slate-400">${b}</td>
                         <td class="py-4 text-slate-400">${c}</td>
