@@ -2,208 +2,313 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Simulador Lógico Pro - Estilo Proteus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio de Lógica - Análisis Completo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #1e293b; color: white; font-family: 'Consolas', monospace; }
-        .grid-bg {
-            background-color: #cbd5e1;
-            background-image: radial-gradient(#94a3b8 1px, transparent 1px);
-            background-size: 20px 20px;
-            border-radius: 8px;
-            position: relative;
-        }
-        /* Colores de señales Proteus */
-        .wire { fill: none; stroke-width: 3; transition: all 0.3s; }
-        .high { stroke: #ef4444; filter: drop-shadow(0 0 5px #ef4444); } /* Rojo */
-        .low { stroke: #2563eb; } /* Azul */
-        
-        .probe { width: 12px; height: 12px; border: 1px solid #000; }
-        .probe-1 { background: #ef4444; }
-        .probe-0 { background: #2563eb; }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=JetBrains+Mono&display=swap');
 
-        .gate-label { fill: #334155; font-size: 10px; font-weight: bold; pointer-events: none; }
-        .switch-btn { transition: all 0.2s; cursor: pointer; }
-        .switch-btn:active { transform: scale(0.9); }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+
+        .canvas-container {
+            background-color: #1e293b;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid #334155;
+        }
+
+        .wire {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: stroke 0.3s ease, filter 0.3s ease;
+        }
+
+        .wire-on {
+            stroke: #ef4444;
+            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
+        }
+
+        .wire-off {
+            stroke: #334155;
+        }
+
+        .input-node {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .input-node:hover {
+            transform: scale(1.05);
+        }
+
+        .math-main {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
+        }
+
+        .analysis-card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .table-header-alt {
+            background-color: #0f172a;
+            color: #94a3b8;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .current-row {
+            background-color: rgba(239, 68, 68, 0.1) !important;
+            border-left: 4px solid #ef4444;
+        }
+
+        .math-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
     </style>
 </head>
-<body class="p-4">
-    <div class="max-w-6xl mx-auto space-y-4">
-        <div class="flex justify-between items-center bg-slate-900 p-4 rounded-lg border-b-4 border-blue-500 shadow-xl">
-            <div>
-                <h1 class="text-2xl font-black text-blue-400 tracking-tighter">LABORATORIO VIRTUAL LÓGICO</h1>
-                <p class="text-xs text-slate-400">BASADO EN LA ECUACIÓN 2: F = (-A*-B*C) + (-A*B*C) + (A*B*C)</p>
-            </div>
-            <div class="text-right">
-                <div id="status-badge" class="px-3 py-1 bg-emerald-500 text-black text-xs font-bold rounded animate-pulse">SIMULACIÓN ACTIVA</div>
-            </div>
-        </div>
+<body class="p-4 md:p-10">
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-            <div class="bg-slate-800 p-4 rounded-lg border border-slate-700">
-                <h2 class="text-sm font-bold mb-4 text-slate-400 border-b border-slate-700 pb-2 uppercase text-center">Entradas (Logic)</h2>
-                <div class="space-y-6" id="controls">
-                    <div class="flex flex-col items-center">
-                        <span class="text-xl font-bold mb-1">A</span>
-                        <div onclick="toggleVar('A')" id="btn-A" class="switch-btn w-12 h-12 rounded bg-blue-600 border-2 border-white flex items-center justify-center text-xl font-black shadow-lg">0</div>
+    <div class="max-w-7xl mx-auto space-y-8">
+        <!-- Header -->
+        <header class="text-center space-y-6">
+            <h1 class="text-3xl font-black text-white tracking-tight uppercase">Simulador Lógico Profesional</h1>
+            
+            <div class="flex flex-wrap justify-center gap-4 items-center">
+                <div class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl text-slate-400 text-sm math-font">
+                    Simplificada: F = (¬A + B) · C
+                </div>
+                <div class="math-main text-lg md:text-xl">
+                    F = (-A * -B * C) + (-A * B * C) + (A * B * C)
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Simulation Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Circuito -->
+            <div class="lg:col-span-8">
+                <div class="canvas-container p-6">
+                    <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                        <span class="text-[10px] font-black text-slate-500 tracking-widest uppercase">Vista de Diagrama</span>
+                        <div class="flex gap-4">
+                            <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-red-500 rounded-full shadow-[0_0_8px_#ef4444]"></div>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">Activo</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex flex-col items-center">
-                        <span class="text-xl font-bold mb-1">B</span>
-                        <div onclick="toggleVar('B')" id="btn-B" class="switch-btn w-12 h-12 rounded bg-blue-600 border-2 border-white flex items-center justify-center text-xl font-black shadow-lg">0</div>
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <span class="text-xl font-bold mb-1">C</span>
-                        <div onclick="toggleVar('C')" id="btn-C" class="switch-btn w-12 h-12 rounded bg-blue-600 border-2 border-white flex items-center justify-center text-xl font-black shadow-lg">0</div>
-                    </div>
+
+                    <svg id="circuit-svg" viewBox="0 0 800 500" class="w-full h-auto">
+                        <defs>
+                            <symbol id="gate-not" viewBox="0 0 60 40">
+                                <path d="M 10 5 L 10 35 L 40 20 Z" fill="#f59e0b" />
+                                <circle cx="48" cy="20" r="5" fill="#1e293b" stroke="#f59e0b" stroke-width="3" />
+                            </symbol>
+                            <symbol id="gate-or" viewBox="0 0 80 50">
+                                <path d="M 10 5 Q 30 25 10 45 Q 45 45 70 25 Q 45 5 10 5 Z" fill="#10b981" />
+                            </symbol>
+                            <symbol id="gate-and" viewBox="0 0 80 50">
+                                <path d="M 10 5 L 10 45 L 40 45 Q 70 45 70 25 Q 70 5 40 5 Z" fill="#3b82f6" />
+                            </symbol>
+                        </defs>
+
+                        <g id="wires-group"></g>
+
+                        <!-- Inputs -->
+                        <g class="input-node" onclick="toggle('A')">
+                            <rect x="40" y="80" width="80" height="60" rx="12" id="bg-A" fill="#334155" />
+                            <text x="80" y="120" text-anchor="middle" fill="white" font-size="24" font-weight="bold" id="txt-A">0</text>
+                            <text x="80" y="70" text-anchor="middle" fill="#64748b" font-weight="bold" font-size="14">A</text>
+                        </g>
+
+                        <g class="input-node" onclick="toggle('B')">
+                            <rect x="40" y="220" width="80" height="60" rx="12" id="bg-B" fill="#334155" />
+                            <text x="80" y="260" text-anchor="middle" fill="white" font-size="24" font-weight="bold" id="txt-B">0</text>
+                            <text x="80" y="210" text-anchor="middle" fill="#64748b" font-weight="bold" font-size="14">B</text>
+                        </g>
+
+                        <g class="input-node" onclick="toggle('C')">
+                            <rect x="40" y="360" width="80" height="60" rx="12" id="bg-C" fill="#334155" />
+                            <text x="80" y="400" text-anchor="middle" fill="white" font-size="24" font-weight="bold" id="txt-C">0</text>
+                            <text x="80" y="350" text-anchor="middle" fill="#64748b" font-weight="bold" font-size="14">C</text>
+                        </g>
+
+                        <use href="#gate-not" x="200" y="90" width="70" height="50" />
+                        <use href="#gate-or" x="360" y="160" width="90" height="60" />
+                        <use href="#gate-and" x="560" y="245" width="90" height="60" />
+
+                        <!-- Result -->
+                        <g>
+                            <circle cx="740" cy="275" r="35" id="circle-F" fill="#0f172a" stroke="#334155" stroke-width="4" />
+                            <text x="740" y="285" text-anchor="middle" fill="#334155" font-size="28" font-weight="bold" id="txt-F">0</text>
+                            <text x="740" y="335" text-anchor="middle" fill="#94a3b8" font-weight="bold" font-size="14">F</text>
+                        </g>
+                    </svg>
                 </div>
             </div>
 
-            <div class="lg:col-span-2 grid-bg p-2 min-h-[500px] border-2 border-slate-400 overflow-hidden shadow-2xl">
-                <svg id="schematic" viewBox="0 0 600 500" class="w-full h-full">
-                    </svg>
+            <!-- Tabla Lateral Rápida -->
+            <div class="lg:col-span-4">
+                <div class="analysis-card p-6 h-full">
+                    <h2 class="text-lg font-bold mb-4 text-white flex items-center gap-2">
+                        <span class="w-1 h-4 bg-blue-500"></span> Tabla de Verdad
+                    </h2>
+                    <div class="overflow-hidden rounded-xl border border-slate-700">
+                        <table class="w-full text-center text-sm">
+                            <thead class="table-header-alt">
+                                <tr>
+                                    <th class="py-3">A</th>
+                                    <th class="py-3">B</th>
+                                    <th class="py-3">C</th>
+                                    <th class="py-3 text-red-400">F</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quick-table" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div class="space-y-4">
-                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
-                    <h2 class="text-xs font-bold text-center mb-2">TABLA DE VERDAD</h2>
-                    <table class="w-full text-[10px] text-center border-collapse">
-                        <thead class="bg-slate-800 text-blue-400">
-                            <tr>
-                                <th class="p-1 border border-slate-700">A</th>
-                                <th class="p-1 border border-slate-700">B</th>
-                                <th class="p-1 border border-slate-700">C</th>
-                                <th class="p-1 border border-slate-700 bg-blue-900">F</th>
+        <!-- Tabla de Análisis Detallado (La que pediste al final) -->
+        <section class="space-y-4">
+            <h2 class="text-xl font-bold text-white px-2">Desglose de Valores por Término</h2>
+            <div class="analysis-card p-2 md:p-6 shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-center math-font">
+                        <thead class="table-header-alt">
+                            <tr class="border-b border-slate-700">
+                                <th class="py-4 px-2">A</th>
+                                <th class="py-4 px-2">B</th>
+                                <th class="py-4 px-2">C</th>
+                                <th class="py-4 px-2 bg-slate-800/50">(-A*-B*C)</th>
+                                <th class="py-4 px-2 bg-slate-800/50">(-A*B*C)</th>
+                                <th class="py-4 px-2 bg-slate-800/50">(A*B*C)</th>
+                                <th class="py-4 px-2 text-red-500 font-black">Resultado F</th>
                             </tr>
                         </thead>
-                        <tbody id="truth-table-body"></tbody>
+                        <tbody id="detailed-table" class="divide-y divide-slate-800 text-sm">
+                            <!-- Filas dinámicas -->
+                        </tbody>
                     </table>
                 </div>
-
-                <div class="bg-black p-6 rounded-lg border-2 border-slate-700 flex flex-col items-center justify-center">
-                    <span class="text-[10px] text-slate-500 mb-2">OUTPUT PROBE (F)</span>
-                    <div id="final-out" class="text-6xl font-black text-blue-600 transition-all duration-300">0</div>
-                </div>
             </div>
-        </div>
+        </section>
     </div>
 
     <script>
-        let state = { A: 0, B: 0, C: 0 };
+        const state = { A: 0, B: 0, C: 0 };
 
-        function toggleVar(v) {
-            state[v] = state[v] === 0 ? 1 : 0;
-            const btn = document.getElementById(`btn-${v}`);
-            btn.innerText = state[v];
-            btn.className = `switch-btn w-12 h-12 rounded border-2 border-white flex items-center justify-center text-xl font-black shadow-lg ${state[v] ? 'bg-red-600' : 'bg-blue-600'}`;
+        function toggle(k) {
+            state[k] = state[k] === 0 ? 1 : 0;
             update();
         }
 
-        function calculateLogic() {
-            const { A, B, C } = state;
-            // Ecuación: F = (-A*-B*C) + (-A*B*C) + (A*B*C)
-            const term1 = (!A && !B && C);
-            const term2 = (!A && B && C);
-            const term3 = (A && B && C);
-            return { f: (term1 || term2 || term3) ? 1 : 0, t1: term1, t2: term2, t3: term3 };
+        function setRow(a, b, c) {
+            state.A = a; state.B = b; state.C = c;
+            update();
         }
 
-        function drawSchematic() {
-            const svg = document.getElementById('schematic');
-            const res = calculateLogic();
-            const { A, B, C } = state;
+        function calculateValues(a, b, c) {
+            const na = a === 0 ? 1 : 0;
+            const nb = b === 0 ? 1 : 0;
+            
+            const t1 = (na && nb && c) ? 1 : 0;
+            const t2 = (na && b && c) ? 1 : 0;
+            const t3 = (a && b && c) ? 1 : 0;
+            
+            return { t1, t2, t3, f: (t1 || t2 || t3) ? 1 : 0, na };
+        }
 
-            // Limpiar SVG
-            svg.innerHTML = `
-                <defs>
-                    <symbol id="not-gate" viewBox="0 0 40 40">
-                        <path d="M 5 5 L 5 35 L 30 20 Z" fill="#e2e8f0" stroke="#1e293b" stroke-width="2"/>
-                        <circle cx="34" cy="20" r="4" fill="#fff" stroke="#1e293b" stroke-width="2"/>
-                    </symbol>
-                    <symbol id="and-gate" viewBox="0 0 50 50">
-                        <path d="M 5 5 L 5 45 L 25 45 Q 45 45 45 25 Q 45 5 25 5 Z" fill="#e2e8f0" stroke="#1e293b" stroke-width="2"/>
-                    </symbol>
-                    <symbol id="or-gate" viewBox="0 0 50 50">
-                        <path d="M 5 5 Q 15 25 5 45 Q 35 45 45 25 Q 35 5 5 5 Z" fill="#e2e8f0" stroke="#1e293b" stroke-width="2"/>
-                    </symbol>
-                </defs>
-            `;
+        function update() {
+            const current = calculateValues(state.A, state.B, state.C);
+            const orRes = (current.na || state.B) ? 1 : 0;
 
-            // 1. Dibujar entradas y cables iniciales
-            const inputs = ['A', 'B', 'C'];
-            inputs.forEach((label, i) => {
-                const y = 80 + (i * 140);
-                const val = state[label];
-                svg.innerHTML += `
-                    <text x="20" y="${y+5}" class="font-bold fill-slate-800 text-xl">${label}</text>
-                    <rect x="45" y="${y-15}" width="30" height="30" fill="${val ? '#ef4444' : '#2563eb'}" />
-                    <text x="60" y="${y+7}" fill="white" font-weight="bold" text-anchor="middle">${val}</text>
-                    <path d="M 75 ${y} L 120 ${y}" class="wire ${val ? 'high' : 'low'}" />
-                `;
+            // Update Inputs
+            ['A', 'B', 'C'].forEach(k => {
+                document.getElementById(`txt-${k}`).textContent = state[k];
+                document.getElementById(`bg-${k}`).setAttribute('fill', state[k] ? '#ef4444' : '#334155');
             });
 
-            // 2. Dibujar Inversores (NOT) para A y B
-            svg.innerHTML += `
-                <use href="#not-gate" x="120" y="60" width="40" height="40" />
-                <use href="#not-gate" x="120" y="200" width="40" height="40" />
-                <path d="M 160 80 L 200 80" class="wire ${!A ? 'high' : 'low'}" />
-                <path d="M 160 220 L 200 220" class="wire ${!B ? 'high' : 'low'}" />
-                <text x="125" y="55" class="gate-label">NOT</text>
-            `;
+            // Update Output
+            const circF = document.getElementById('circle-F');
+            const txtF = document.getElementById('txt-F');
+            circF.setAttribute('stroke', current.f ? '#ef4444' : '#334155');
+            circF.setAttribute('fill', current.f ? 'rgba(239, 68, 68, 0.1)' : '#0f172a');
+            txtF.textContent = current.f;
+            txtF.setAttribute('fill', current.f ? '#ef4444' : '#334155');
 
-            // 3. Dibujar AND para el Término 1 (-A*-B*C)
-            svg.innerHTML += `
-                <use href="#and-gate" x="250" y="100" width="60" height="60" />
-                <path d="M 200 80 L 250 115" class="wire ${!A ? 'high' : 'low'}" />
-                <path d="M 200 220 L 250 130" class="wire ${!B ? 'high' : 'low'}" />
-                <path d="M 75 360 L 250 145" class="wire ${C ? 'high' : 'low'}" />
-                <text x="265" y="95" class="gate-label">AND (T1)</text>
-                <path d="M 310 130 L 400 230" class="wire ${res.t1 ? 'high' : 'low'}" />
-            `;
+            // Cables
+            const wires = [
+                { d: "M 120 110 L 200 110", active: state.A === 1 },
+                { d: "M 270 115 L 320 115 L 320 180 L 360 180", active: current.na === 1 },
+                { d: "M 120 250 L 320 250 L 320 200 L 360 200", active: state.B === 1 },
+                { d: "M 450 190 L 510 190 L 510 260 L 560 260", active: orRes === 1 },
+                { d: "M 120 390 L 510 390 L 510 290 L 560 290", active: state.C === 1 },
+                { d: "M 650 275 L 705 275", active: current.f === 1 }
+            ];
 
-            // 4. Compuerta OR Final
-            svg.innerHTML += `
-                <use href="#or-gate" x="420" y="210" width="80" height="80" />
-                <text x="440" y="205" class="gate-label">OR FINAL</text>
-                <path d="M 500 250 L 550 250" class="wire ${res.f ? 'high' : 'low'}" />
-                <rect x="550" y="235" width="30" height="30" fill="${res.f ? '#ef4444' : '#2563eb'}" />
-                <text x="565" y="255" fill="white" font-weight="bold" text-anchor="middle">${res.f}</text>
-            `;
+            document.getElementById('wires-group').innerHTML = wires.map(w => 
+                `<path d="${w.d}" class="wire ${w.active ? 'wire-on' : 'wire-off'}" />`
+            ).join('');
+
+            renderTables();
         }
 
-        function renderTable() {
-            const body = document.getElementById('truth-table-body');
-            body.innerHTML = '';
+        function renderTables() {
+            const quickBody = document.getElementById('quick-table');
+            const detailBody = document.getElementById('detailed-table');
+            quickBody.innerHTML = '';
+            detailBody.innerHTML = '';
+
             for (let i = 0; i < 8; i++) {
-                const a = (i & 4) ? 1 : 0;
-                const b = (i & 2) ? 1 : 0;
-                const c = (i & 1) ? 1 : 0;
-                
-                // Cálculo de la fila
-                const f = ((!a && !b && c) || (!a && b && c) || (a && b && c)) ? 1 : 0;
-                const isCurrent = (a === state.A && b === state.B && c === state.C);
-                
-                body.innerHTML += `
-                    <tr class="${isCurrent ? 'bg-blue-600/40 font-bold' : ''} border-b border-slate-800">
-                        <td class="p-1">${a}</td>
-                        <td class="p-1">${b}</td>
-                        <td class="p-1">${c}</td>
-                        <td class="p-1 text-blue-400">${f}</td>
+                const a = (i >> 2) & 1;
+                const b = (i >> 1) & 1;
+                const c = i & 1;
+                const vals = calculateValues(a, b, c);
+                const isActive = (a === state.A && b === state.B && c === state.C);
+                const rowClass = isActive ? 'current-row' : '';
+
+                // Quick Table
+                quickBody.innerHTML += `
+                    <tr class="table-row ${rowClass}" onclick="setRow(${a},${b},${c})">
+                        <td class="py-3">${a}</td>
+                        <td class="py-3">${b}</td>
+                        <td class="py-3">${c}</td>
+                        <td class="py-3 font-bold ${vals.f ? 'text-red-500' : 'text-slate-600'}">${vals.f}</td>
+                    </tr>
+                `;
+
+                // Detailed Table
+                detailBody.innerHTML += `
+                    <tr class="${rowClass} hover:bg-slate-800/30 transition-colors" onclick="setRow(${a},${b},${c})">
+                        <td class="py-4 text-slate-400">${a}</td>
+                        <td class="py-4 text-slate-400">${b}</td>
+                        <td class="py-4 text-slate-400">${c}</td>
+                        <td class="py-4 ${vals.t1 ? 'text-red-400 font-bold' : 'text-slate-700'}">${vals.t1}</td>
+                        <td class="py-4 ${vals.t2 ? 'text-red-400 font-bold' : 'text-slate-700'}">${vals.t2}</td>
+                        <td class="py-4 ${vals.t3 ? 'text-red-400 font-bold' : 'text-slate-700'}">${vals.t3}</td>
+                        <td class="py-4 font-black ${vals.f ? 'text-red-500 text-lg' : 'text-slate-700'}">${vals.f}</td>
                     </tr>
                 `;
             }
         }
 
-        function update() {
-            const res = calculateLogic();
-            const out = document.getElementById('final-out');
-            out.innerText = res.f;
-            out.className = `text-6xl font-black transition-all duration-300 ${res.f ? 'text-red-500 shadow-lg' : 'text-blue-600'}`;
-            
-            drawSchematic();
-            renderTable();
-        }
-
-        // Inicializar
         update();
     </script>
 </body>
