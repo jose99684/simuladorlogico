@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laboratorio de Lógica - Doble Inversor</title>
+    <title>Laboratorio de Lógica - Análisis de Doble NOT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&family=JetBrains+Mono&display=swap');
@@ -23,19 +23,17 @@
 
         .wire {
             fill: none;
-            stroke-width: 8;
+            stroke-width: 6;
             stroke-linecap: round;
             stroke-linejoin: round;
             transition: stroke 0.3s ease, filter 0.3s ease;
         }
 
-        /* Color Blanco para el estado 1 (Activo) */
         .wire-on {
             stroke: #ffffff;
             filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
         }
 
-        /* Color Rojo para el estado 0 (Inactivo) */
         .wire-off {
             stroke: #ef4444;
             filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.3));
@@ -51,12 +49,12 @@
         }
 
         .math-main {
-            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
             padding: 1rem 2rem;
             border-radius: 20px;
             font-family: 'JetBrains Mono', monospace;
-            box-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.2);
         }
 
         .analysis-card {
@@ -75,7 +73,7 @@
         }
 
         .current-row {
-            background-color: rgba(59, 130, 246, 0.1) !important;
+            background-color: rgba(59, 130, 246, 0.15) !important;
             border-left: 4px solid #3b82f6;
         }
 
@@ -93,7 +91,7 @@
             
             <div class="flex flex-wrap justify-center gap-4 items-center">
                 <div class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl text-slate-400 text-sm math-font">
-                    Simplificada: F = (¬A · ¬B) + C
+                    Expresión: F = (¬A + B) · C
                 </div>
                 <div class="math-main text-lg md:text-xl">
                     F = (-A * -B * C) + (-A * B * C) + (A * B * C)
@@ -103,19 +101,18 @@
 
         <!-- Main Simulation Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Circuito -->
             <div class="lg:col-span-8">
                 <div class="canvas-container p-6">
                     <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-                        <span class="text-[10px] font-black text-slate-500 tracking-widest uppercase">Vista de Diagrama (Doble NOT)</span>
+                        <span class="text-[10px] font-black text-slate-500 tracking-widest uppercase">Diagrama de Compuertas (Basado en Imagen)</span>
                         <div class="flex gap-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-3 h-3 bg-white rounded-full shadow-[0_0_8px_white]"></div>
-                                <span class="text-[10px] text-slate-400 font-bold uppercase">Valor 1 (Blanco)</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">1 (High)</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <div class="w-3 h-3 bg-red-500 rounded-full shadow-[0_0_8px_#ef4444]"></div>
-                                <span class="text-[10px] text-slate-400 font-bold uppercase">Valor 0 (Rojo)</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">0 (Low)</span>
                             </div>
                         </div>
                     </div>
@@ -123,55 +120,55 @@
                     <svg id="circuit-svg" viewBox="0 0 800 500" class="w-full h-auto">
                         <defs>
                             <symbol id="gate-not" viewBox="0 0 60 40">
-                                <path d="M 10 5 L 10 35 L 40 20 Z" fill="#f59e0b" />
-                                <circle cx="48" cy="20" r="5" fill="#1e293b" stroke="#f59e0b" stroke-width="3" />
+                                <path d="M 10 5 L 10 35 L 40 20 Z" fill="#64748b" stroke="white" stroke-width="1"/>
+                                <circle cx="48" cy="20" r="5" fill="#1e293b" stroke="white" stroke-width="2" />
                             </symbol>
                             <symbol id="gate-or" viewBox="0 0 80 50">
-                                <path d="M 10 5 Q 30 25 10 45 Q 45 45 70 25 Q 45 5 10 5 Z" fill="#10b981" />
+                                <path d="M 10 5 Q 30 25 10 45 Q 45 45 70 25 Q 45 5 10 5 Z" fill="#1e293b" stroke="white" stroke-width="2" />
                             </symbol>
                             <symbol id="gate-and" viewBox="0 0 80 50">
-                                <path d="M 10 5 L 10 45 L 40 45 Q 70 45 70 25 Q 70 5 40 5 Z" fill="#3b82f6" />
+                                <path d="M 10 5 L 10 45 L 40 45 Q 70 45 70 25 Q 70 5 40 5 Z" fill="#1e293b" stroke="white" stroke-width="2" />
                             </symbol>
                         </defs>
 
                         <g id="wires-group"></g>
 
-                        <!-- Inputs -->
+                        <!-- Input A -->
                         <g class="input-node" onclick="toggle('A')">
-                            <rect x="40" y="80" width="80" height="60" rx="12" id="bg-A" fill="#334155" />
-                            <text x="80" y="120" text-anchor="middle" fill="white" font-size="24" font-weight="bold" id="txt-A">0</text>
-                            <text x="80" y="70" text-anchor="middle" fill="#64748b" font-weight="bold" font-size="14">A</text>
+                            <rect x="40" y="60" width="60" height="50" rx="8" id="bg-A" fill="#334155" />
+                            <text x="70" y="95" text-anchor="middle" fill="white" font-size="20" font-weight="bold" id="txt-A">0</text>
+                            <text x="25" y="90" text-anchor="middle" fill="#94a3b8" font-weight="bold" font-size="16">A</text>
                         </g>
 
+                        <!-- Input B -->
                         <g class="input-node" onclick="toggle('B')">
-                            <rect x="40" y="220" width="80" height="60" rx="12" id="bg-B" fill="#334155" />
-                            <text x="80" y="260" text-anchor="middle" fill="white" font-size="24" font-weight="bold" id="txt-B">0</text>
-                            <text x="80" y="210" text-anchor="middle" fill="#64748b" font-weight="bold" font-size="14">B</text>
+                            <rect x="40" y="180" width="60" height="50" rx="8" id="bg-B" fill="#334155" />
+                            <text x="70" y="215" text-anchor="middle" fill="white" font-size="20" font-weight="bold" id="txt-B">0</text>
+                            <text x="25" y="210" text-anchor="middle" fill="#94a3b8" font-weight="bold" font-size="16">B</text>
                         </g>
 
+                        <!-- Input C -->
                         <g class="input-node" onclick="toggle('C')">
-                            <rect x="40" y="360" width="80" height="60" rx="12" id="bg-C" fill="#334155" />
-                            <text x="80" y="400" text-anchor="middle" fill="white" font-size="24" font-weight="bold" id="txt-C">0</text>
-                            <text x="80" y="350" text-anchor="middle" fill="#64748b" font-weight="bold" font-size="14">C</text>
+                            <rect x="40" y="380" width="60" height="50" rx="8" id="bg-C" fill="#334155" />
+                            <text x="70" y="415" text-anchor="middle" fill="white" font-size="20" font-weight="bold" id="txt-C">0</text>
+                            <text x="25" y="410" text-anchor="middle" fill="#94a3b8" font-weight="bold" font-size="16">C</text>
                         </g>
 
-                        <!-- Gates -->
-                        <!-- NOT en A -->
-                        <use href="#gate-not" x="180" y="90" width="70" height="50" />
-                        <!-- NOT en B -->
-                        <use href="#gate-not" x="180" y="230" width="70" height="50" />
+                        <!-- Gates Labels -->
+                        <text x="210" y="60" fill="#475569" font-size="12" font-weight="bold">INV_A</text>
+                        <use href="#gate-not" x="180" y="70" width="70" height="50" />
                         
-                        <!-- AND gate (T1) -->
-                        <use href="#gate-and" x="380" y="150" width="90" height="60" />
+                        <text x="310" y="100" fill="#475569" font-size="12" font-weight="bold">OR_STAGE</text>
+                        <use href="#gate-or" x="280" y="110" width="90" height="60" />
                         
-                        <!-- OR gate (Final) -->
-                        <use href="#gate-or" x="580" y="250" width="90" height="60" />
+                        <text x="490" y="130" fill="#475569" font-size="12" font-weight="bold">AND_FINAL</text>
+                        <use href="#gate-and" x="460" y="140" width="90" height="60" />
 
-                        <!-- Result -->
+                        <!-- Result F -->
                         <g>
-                            <circle cx="750" cy="275" r="35" id="circle-F" fill="#0f172a" stroke="#334155" stroke-width="4" />
-                            <text x="750" y="285" text-anchor="middle" fill="#334155" font-size="28" font-weight="bold" id="txt-F">0</text>
-                            <text x="750" y="335" text-anchor="middle" fill="#94a3b8" font-weight="bold" font-size="14">F</text>
+                            <circle cx="700" cy="170" r="30" id="circle-F" fill="#0f172a" stroke="#334155" stroke-width="4" />
+                            <text x="700" y="180" text-anchor="middle" fill="#334155" font-size="24" font-weight="bold" id="txt-F">0</text>
+                            <text x="740" y="175" fill="#94a3b8" font-weight="bold" font-size="18">F</text>
                         </g>
                     </svg>
                 </div>
@@ -190,7 +187,7 @@
                                     <th class="py-3">A</th>
                                     <th class="py-3">B</th>
                                     <th class="py-3">C</th>
-                                    <th class="py-3 text-red-400">F</th>
+                                    <th class="py-3 text-blue-400">F</th>
                                 </tr>
                             </thead>
                             <tbody id="quick-table" class="divide-y divide-slate-800"></tbody>
@@ -200,25 +197,24 @@
             </div>
         </div>
 
-        <!-- Tabla de Análisis Detallado -->
+        <!-- Tabla Detallada -->
         <section class="space-y-4">
-            <h2 class="text-xl font-bold text-white px-2">Desglose de Valores por Término</h2>
-            <div class="analysis-card p-2 md:p-6 shadow-2xl">
+            <h2 class="text-xl font-bold text-white px-2">Análisis Detallado (Como en tu Excel)</h2>
+            <div class="analysis-card p-2 md:p-6">
                 <div class="overflow-x-auto">
                     <table class="w-full text-center math-font">
                         <thead class="table-header-alt">
                             <tr class="border-b border-slate-700">
                                 <th class="py-4 px-2">A</th>
                                 <th class="py-4 px-2">B</th>
-                                <th class="py-3 px-2">C</th>
-                                <th class="py-4 px-2 bg-slate-800/50">T1:(-A*-B*C)</th>
-                                <th class="py-4 px-2 bg-slate-800/50">T2:(-A*B*C)</th>
-                                <th class="py-4 px-2 bg-slate-800/50">T3:(A*B*C)</th>
-                                <th class="py-4 px-2 text-red-500 font-black">Resultado F</th>
+                                <th class="py-4 px-2">C</th>
+                                <th class="py-4 px-2 bg-slate-800/30">(-A*-B*C)</th>
+                                <th class="py-4 px-2 bg-slate-800/30">(-A*B*C)</th>
+                                <th class="py-4 px-2 bg-slate-800/30">(A*B*C)</th>
+                                <th class="py-4 px-2 text-blue-500 font-black">F Final</th>
                             </tr>
                         </thead>
-                        <tbody id="detailed-table" class="divide-y divide-slate-800 text-sm">
-                        </tbody>
+                        <tbody id="detailed-table" class="divide-y divide-slate-800 text-sm"></tbody>
                     </table>
                 </div>
             </div>
@@ -238,34 +234,35 @@
             update();
         }
 
-        function calculateValues(a, b, c) {
+        function calculateAll(a, b, c) {
             const na = a === 0 ? 1 : 0;
             const nb = b === 0 ? 1 : 0;
             
-            // Términos de la fórmula larga
+            // Términos del Excel
             const t1 = (na && nb && c) ? 1 : 0;
             const t2 = (na && b && c) ? 1 : 0;
             const t3 = (a && b && c) ? 1 : 0;
             
-            // Lógica del circuito gráfico: (¬A AND ¬B) OR C
-            // Nota: El gráfico muestra que (¬A AND ¬B) se suma con C
-            const andPart = (na && nb) ? 1 : 0;
-            const f_circuit = (andPart || c) ? 1 : 0;
-            
-            return { na, nb, andPart, t1, t2, t3, f: f_circuit };
+            // Lógica del Circuito: (NOT A OR B) AND C
+            const orPart = (na || b) ? 1 : 0;
+            const f = (orPart && c) ? 1 : 0;
+
+            return { na, orPart, t1, t2, t3, f };
         }
 
         function update() {
-            const current = calculateValues(state.A, state.B, state.C);
+            const current = calculateAll(state.A, state.B, state.C);
 
-            // Update Inputs
+            // Nodos Entrada
             ['A', 'B', 'C'].forEach(k => {
-                document.getElementById(`txt-${k}`).textContent = state[k];
-                document.getElementById(`bg-${k}`).setAttribute('fill', state[k] ? '#ffffff' : '#ef4444');
-                document.getElementById(`txt-${k}`).setAttribute('fill', state[k] ? '#0f172a' : '#ffffff');
+                const bg = document.getElementById(`bg-${k}`);
+                const txt = document.getElementById(`txt-${k}`);
+                txt.textContent = state[k];
+                bg.setAttribute('fill', state[k] ? '#ffffff' : '#ef4444');
+                txt.setAttribute('fill', state[k] ? '#0f172a' : '#ffffff');
             });
 
-            // Update Output
+            // Nodo Salida F
             const circF = document.getElementById('circle-F');
             const txtF = document.getElementById('txt-F');
             circF.setAttribute('stroke', current.f ? '#ffffff' : '#ef4444');
@@ -273,20 +270,14 @@
             txtF.textContent = current.f;
             txtF.setAttribute('fill', current.f ? '#ffffff' : '#ef4444');
 
-            // Cables (Blanco para 1, Rojo para 0)
+            // Cables (Basados en la imagen 1)
             const wires = [
-                // Entradas a NOTs
-                { d: "M 120 110 L 180 110", active: state.A === 1 },
-                { d: "M 120 250 L 180 250", active: state.B === 1 },
-                // Salidas NOTs a AND
-                { d: "M 250 115 L 330 115 L 330 165 L 380 165", active: current.na === 1 },
-                { d: "M 250 255 L 330 255 L 330 195 L 380 195", active: current.nb === 1 },
-                // Salida AND a OR
-                { d: "M 470 180 L 530 180 L 530 265 L 580 265", active: current.andPart === 1 },
-                // Entrada C a OR
-                { d: "M 120 390 L 530 390 L 530 285 L 580 285", active: state.C === 1 },
-                // Salida Final
-                { d: "M 670 275 L 715 275", active: current.f === 1 }
+                { d: "M 100 85 L 180 85", active: state.A === 1 },             // A a NOT
+                { d: "M 250 95 L 280 125", active: current.na === 1 },          // NOT a OR
+                { d: "M 100 205 L 280 145", active: state.B === 1 },            // B a OR
+                { d: "M 370 140 L 460 155", active: current.orPart === 1 },      // OR a AND
+                { d: "M 100 405 L 420 405 L 420 175 L 460 175", active: state.C === 1 }, // C a AND
+                { d: "M 550 170 L 670 170", active: current.f === 1 }           // AND a F
             ];
 
             document.getElementById('wires-group').innerHTML = wires.map(w => 
@@ -306,28 +297,28 @@
                 const a = (i >> 2) & 1;
                 const b = (i >> 1) & 1;
                 const c = i & 1;
-                const vals = calculateValues(a, b, c);
+                const res = calculateAll(a, b, c);
                 const isActive = (a === state.A && b === state.B && c === state.C);
                 const rowClass = isActive ? 'current-row' : '';
 
                 quickBody.innerHTML += `
-                    <tr class="table-row ${rowClass} cursor-pointer hover:bg-slate-700/20" onclick="setRow(${a},${b},${c})">
+                    <tr class="${rowClass} cursor-pointer" onclick="setRow(${a},${b},${c})">
                         <td class="py-3">${a}</td>
                         <td class="py-3">${b}</td>
                         <td class="py-3">${c}</td>
-                        <td class="py-3 font-bold ${vals.f ? 'text-white' : 'text-red-500'}">${vals.f}</td>
+                        <td class="py-3 font-bold ${res.f ? 'text-white' : 'text-red-500'}">${res.f}</td>
                     </tr>
                 `;
 
                 detailBody.innerHTML += `
-                    <tr class="${rowClass} hover:bg-slate-800/30 transition-colors cursor-pointer" onclick="setRow(${a},${b},${c})">
+                    <tr class="${rowClass} cursor-pointer" onclick="setRow(${a},${b},${c})">
                         <td class="py-4 text-slate-400">${a}</td>
                         <td class="py-4 text-slate-400">${b}</td>
                         <td class="py-4 text-slate-400">${c}</td>
-                        <td class="py-4 ${vals.t1 ? 'text-white font-bold' : 'text-red-500'}">${vals.t1}</td>
-                        <td class="py-4 ${vals.t2 ? 'text-white font-bold' : 'text-red-500'}">${vals.t2}</td>
-                        <td class="py-4 ${vals.t3 ? 'text-white font-bold' : 'text-red-500'}">${vals.t3}</td>
-                        <td class="py-4 font-black ${vals.f ? 'text-white text-lg' : 'text-red-500'}">${vals.f}</td>
+                        <td class="py-4 ${res.t1 ? 'text-white font-bold' : 'text-slate-600'}">${res.t1}</td>
+                        <td class="py-4 ${res.t2 ? 'text-white font-bold' : 'text-slate-600'}">${res.t2}</td>
+                        <td class="py-4 ${res.t3 ? 'text-white font-bold' : 'text-slate-600'}">${res.t3}</td>
+                        <td class="py-4 font-black ${res.f ? 'text-blue-400 text-lg' : 'text-red-500'}">${res.f}</td>
                     </tr>
                 `;
             }
