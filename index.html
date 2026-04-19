@@ -29,13 +29,16 @@
             transition: stroke 0.3s ease, filter 0.3s ease;
         }
 
+        /* Color Blanco para el estado 1 (Activo) */
         .wire-on {
-            stroke: #ef4444;
-            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
+            stroke: #ffffff;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
         }
 
+        /* Color Rojo para el estado 0 (Inactivo) */
         .wire-off {
-            stroke: #334155;
+            stroke: #ef4444;
+            filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.3));
         }
 
         .input-node {
@@ -72,8 +75,8 @@
         }
 
         .current-row {
-            background-color: rgba(239, 68, 68, 0.1) !important;
-            border-left: 4px solid #ef4444;
+            background-color: rgba(59, 130, 246, 0.1) !important;
+            border-left: 4px solid #3b82f6;
         }
 
         .math-font {
@@ -107,8 +110,12 @@
                         <span class="text-[10px] font-black text-slate-500 tracking-widest uppercase">Vista de Diagrama</span>
                         <div class="flex gap-4">
                             <div class="flex items-center gap-2">
+                                <div class="w-3 h-3 bg-white rounded-full shadow-[0_0_8px_white]"></div>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">Valor 1 (Blanco)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
                                 <div class="w-3 h-3 bg-red-500 rounded-full shadow-[0_0_8px_#ef4444]"></div>
-                                <span class="text-[10px] text-slate-400 font-bold uppercase">Activo</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase">Valor 0 (Rojo)</span>
                             </div>
                         </div>
                     </div>
@@ -185,7 +192,7 @@
             </div>
         </div>
 
-        <!-- Tabla de Análisis Detallado (La que pediste al final) -->
+        <!-- Tabla de Análisis Detallado -->
         <section class="space-y-4">
             <h2 class="text-xl font-bold text-white px-2">Desglose de Valores por Término</h2>
             <div class="analysis-card p-2 md:p-6 shadow-2xl">
@@ -242,18 +249,20 @@
             // Update Inputs
             ['A', 'B', 'C'].forEach(k => {
                 document.getElementById(`txt-${k}`).textContent = state[k];
-                document.getElementById(`bg-${k}`).setAttribute('fill', state[k] ? '#ef4444' : '#334155');
+                // El fondo del botón sigue la lógica: Blanco si es 1, Rojo si es 0
+                document.getElementById(`bg-${k}`).setAttribute('fill', state[k] ? '#ffffff' : '#ef4444');
+                document.getElementById(`txt-${k}`).setAttribute('fill', state[k] ? '#0f172a' : '#ffffff');
             });
 
             // Update Output
             const circF = document.getElementById('circle-F');
             const txtF = document.getElementById('txt-F');
-            circF.setAttribute('stroke', current.f ? '#ef4444' : '#334155');
-            circF.setAttribute('fill', current.f ? 'rgba(239, 68, 68, 0.1)' : '#0f172a');
+            circF.setAttribute('stroke', current.f ? '#ffffff' : '#ef4444');
+            circF.setAttribute('fill', current.f ? 'rgba(255, 255, 255, 0.1)' : 'rgba(239, 68, 68, 0.1)');
             txtF.textContent = current.f;
-            txtF.setAttribute('fill', current.f ? '#ef4444' : '#334155');
+            txtF.setAttribute('fill', current.f ? '#ffffff' : '#ef4444');
 
-            // Cables
+            // Cables (Cambiado: Blanco para 1, Rojo para 0)
             const wires = [
                 { d: "M 120 110 L 200 110", active: state.A === 1 },
                 { d: "M 270 115 L 320 115 L 320 180 L 360 180", active: current.na === 1 },
@@ -290,7 +299,7 @@
                         <td class="py-3">${a}</td>
                         <td class="py-3">${b}</td>
                         <td class="py-3">${c}</td>
-                        <td class="py-3 font-bold ${vals.f ? 'text-red-500' : 'text-slate-600'}">${vals.f}</td>
+                        <td class="py-3 font-bold ${vals.f ? 'text-white' : 'text-red-500'}">${vals.f}</td>
                     </tr>
                 `;
 
@@ -300,10 +309,10 @@
                         <td class="py-4 text-slate-400">${a}</td>
                         <td class="py-4 text-slate-400">${b}</td>
                         <td class="py-4 text-slate-400">${c}</td>
-                        <td class="py-4 ${vals.t1 ? 'text-red-400 font-bold' : 'text-slate-700'}">${vals.t1}</td>
-                        <td class="py-4 ${vals.t2 ? 'text-red-400 font-bold' : 'text-slate-700'}">${vals.t2}</td>
-                        <td class="py-4 ${vals.t3 ? 'text-red-400 font-bold' : 'text-slate-700'}">${vals.t3}</td>
-                        <td class="py-4 font-black ${vals.f ? 'text-red-500 text-lg' : 'text-slate-700'}">${vals.f}</td>
+                        <td class="py-4 ${vals.t1 ? 'text-white font-bold' : 'text-red-500'}">${vals.t1}</td>
+                        <td class="py-4 ${vals.t2 ? 'text-white font-bold' : 'text-red-500'}">${vals.t2}</td>
+                        <td class="py-4 ${vals.t3 ? 'text-white font-bold' : 'text-red-500'}">${vals.t3}</td>
+                        <td class="py-4 font-black ${vals.f ? 'text-white text-lg' : 'text-red-500'}">${vals.f}</td>
                     </tr>
                 `;
             }
